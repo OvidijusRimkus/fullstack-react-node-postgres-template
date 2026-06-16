@@ -6,6 +6,8 @@ import useCityStore from "../stores/cityStore";
 
 import AdminStats from "../components/admin/AdminStats";
 import AdminUsersTable from "../components/admin/AdminUsersTable";
+import AdminPlacesTable from "../components/admin/AdminPlacesTable";
+import AdminDashboardLists from "../components/admin/AdminDashboardLists";
 
 import CityForm from "../components/cities/CityForm";
 import CityList from "../components/cities/CityList";
@@ -17,6 +19,7 @@ import CityList from "../components/cities/CityList";
   - dashboard statistika;
   - vartotojų valdymas;
   - miestų CRUD valdymas;
+  - lankytinų vietų lentelė;
   - vietos pagal miestą;
   - vietos pagal tipą;
   - naujausios vietos.
@@ -65,17 +68,29 @@ const AdminDashboardPage = () => {
 
   const handleCityFormSuccess = async () => {
     setEditingCity(null);
+
     await fetchDashboard();
+    await fetchCities();
   };
 
   const handleCancelCityEdit = () => {
     setEditingCity(null);
   };
 
+  /*
+    Kai admin lentelėje ištrinama vieta,
+    atnaujinam dashboard statistiką.
+  */
+  const handleAdminPlacesChange = async () => {
+    await fetchDashboard();
+  };
+
   if (isLoadingDashboard) {
     return (
       <section className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200">
-        <p className="text-gray-600">Kraunamas admin dashboard...</p>
+        <p className="text-gray-600">
+          Kraunamas admin dashboard...
+        </p>
       </section>
     );
   }
@@ -83,7 +98,9 @@ const AdminDashboardPage = () => {
   if (dashboardError) {
     return (
       <section className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200">
-        <h1 className="text-2xl font-bold text-gray-900">Admin dashboard</h1>
+        <h1 className="text-2xl font-bold text-gray-900">
+          Admin dashboard
+        </h1>
 
         <div className="mt-4 rounded-lg bg-red-50 p-4 text-sm text-red-700 border border-red-200">
           {dashboardError}
@@ -100,11 +117,13 @@ const AdminDashboardPage = () => {
   return (
     <section className="grid gap-6">
       <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200">
-        <h1 className="text-2xl font-bold text-gray-900">Admin dashboard</h1>
+        <h1 className="text-2xl font-bold text-gray-900">
+          Admin dashboard
+        </h1>
 
         <p className="mt-2 text-sm text-gray-600">
-          Čia matoma bendra sistemos statistika, vartotojų valdymas ir miestų
-          administravimas.
+          Čia matoma bendra sistemos statistika, vartotojų valdymas,
+          miestų administravimas ir lankytinų vietų lentelė.
         </p>
       </div>
 
@@ -120,51 +139,12 @@ const AdminDashboardPage = () => {
 
       <CityList onEdit={handleEditCity} />
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200">
-          <h2 className="text-lg font-bold text-gray-900">
-            Vietos pagal miestą
-          </h2>
+      <AdminPlacesTable onDataChange={handleAdminPlacesChange} />
 
-          <div className="mt-4 grid gap-3">
-            {placesByCity.map((city) => (
-              <div
-                key={city.id}
-                className="flex items-center justify-between border-b border-gray-100 pb-2 text-sm"
-              >
-                <span className="font-medium text-gray-700">{city.name}</span>
-                <span className="text-gray-500">{city.places_count}</span>
-              </div>
-            ))}
-
-            {placesByCity.length === 0 && (
-              <p className="text-sm text-gray-500">Duomenų nėra.</p>
-            )}
-          </div>
-        </div>
-
-        <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200">
-          <h2 className="text-lg font-bold text-gray-900">
-            Vietos pagal tipą
-          </h2>
-
-          <div className="mt-4 grid gap-3">
-            {placesByType.map((item) => (
-              <div
-                key={item.type}
-                className="flex items-center justify-between border-b border-gray-100 pb-2 text-sm"
-              >
-                <span className="font-medium text-gray-700">{item.type}</span>
-                <span className="text-gray-500">{item.places_count}</span>
-              </div>
-            ))}
-
-            {placesByType.length === 0 && (
-              <p className="text-sm text-gray-500">Duomenų nėra.</p>
-            )}
-          </div>
-        </div>
-      </div>
+      <AdminDashboardLists
+        placesByCity={placesByCity}
+        placesByType={placesByType}
+      />
 
       <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-200">
         <h2 className="text-lg font-bold text-gray-900">
